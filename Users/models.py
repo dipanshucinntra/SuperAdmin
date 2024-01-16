@@ -1,10 +1,10 @@
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 from django.db import models
 
 
 # Create your models here.
 class UserManager(BaseUserManager):
-    def create_user(self, first_name, last_name, email, address, mobile, password=None, password2=None):
+    def create_user(self, first_name, last_name, email, mobile, password=None, password2=None):
         """
         Creates and saves a User with the given email, category, first_name,last_name, email, address, country, state, phone, fax and password.
         """
@@ -15,15 +15,14 @@ class UserManager(BaseUserManager):
             first_name = first_name,
             last_name=last_name,
             email=self.normalize_email(email),    
-            mobile=mobile,                 
-            address=address,            
+            mobile=mobile,                            
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, first_name, last_name, email, mobile, address, password=None):
+    def create_superuser(self, first_name, last_name, email, mobile, password=None):
         """
         Creates and saves a superuser with the given email, category, first_name,last_name, email, address, country, state, phone, fax and password.
         """
@@ -32,15 +31,14 @@ class UserManager(BaseUserManager):
             last_name=last_name, 
             email=email,
             mobile=mobile,
-            password=password,                      
-            address=address,            
+            password=password,                                 
         )
         user.is_admin = True
         user.save(using=self._db)
         return user
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
     id = models.AutoField(primary_key=True, unique=True, editable=False)  
     first_name = models.CharField(max_length=100, blank=False, null=False)
     last_name = models.CharField(max_length=100, blank=False, null=False)
@@ -54,7 +52,7 @@ class User(AbstractBaseUser):
     objects = UserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["first_name", "last_name", "mobile", "address"]
+    REQUIRED_FIELDS = ["first_name", "last_name", "mobile"]
 
     def __str__(self):        
         return self.first_name+" "+self.last_name
