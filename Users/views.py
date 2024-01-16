@@ -3,14 +3,10 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import logout
+from django.contrib.auth import logout as auth_logout
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth.decorators import login_required
-
-from Services.other_services import Link_Generator
 from .serializers import *
 from .models import *
 
@@ -36,12 +32,13 @@ def create(request):
 @api_view(['POST'])
 def login(request):
     try:
+        print("Login ")
         email = request.data['email']
         password = request.data['password']
         if User.objects.filter(email=email).exists():
             user_obj = authenticate(request, email=email, password=password) 
             if user_obj is not None:
-                token = Token.objects.create(user=user_obj)
+                token, created = Token.objects.get_or_create(user=user_obj)
                 return Response({"message":"Success","status":201,"data":[{"token":token.key}]})
             else:
                 return Response({"message":"Unauthorized","status":401,"data":[], "error":"Invaild Email or Password"})  
@@ -130,18 +127,20 @@ def forgot_password(request, uid, token,):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def logout(request):
-    # Check if the user is authenticated
+    # Check if the user is authenticated    
     if request.user.is_authenticated:
         # Revoke or delete the authentication token
         try:
             token = Token.objects.get(user=request.user)
             token.delete()  # or use token.revoke() if you have django-rest-framework-authtoken >= 2.0.0
-        except Token.DoesNotExist as e:
+        except Token.DoesNotExist:
             # Token not found, no action needed
-            return Response({"message":"User is not authenticated","status":201,"data":[], "error":str(e)})    
+            pass
+        
         # Perform regular logout
-        logout(request)
-        return Response({'message': 'Logout successful'})
+        auth_logout(request)   
+        # Perform regular logout 
+        return Response({'message': 'Logout successful', "status":200, "data":[]})       
     else:
-        return Response({'message': 'User is not authenticated'})
+        return Response({'message': 'User is not authenticated', "status":403, "data":[]})
 
