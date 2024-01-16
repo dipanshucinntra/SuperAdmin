@@ -60,7 +60,7 @@ class PasswordChangeSerializer(serializers.Serializer):
         user.save()
         return attrs
 
-class UserPasswordForgotLink(serializers.Serializer):
+class PasswordForgotLinkSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255) 
     def validate(self, attrs):
         email = attrs.get('email')
@@ -71,9 +71,9 @@ class UserPasswordForgotLink(serializers.Serializer):
             print("Encoded user is: ", uid)
             token =PasswordResetTokenGenerator().make_token(user )
             print("Generated token: ", token)
-            link ="http://127.0.0.1:9000/password_reset/"+uid+'/'+token
+            link ="http://127.0.0.1:8000/api/user/password_reset/"+uid+'/'+token
             print("Generated link: ", link)
-            body="Click following link to reset password"+link            
+            body="Click following link to reset password "+link            
             subject= "Rest Password" 
             to_email = email
             attachments =""
@@ -82,13 +82,12 @@ class UserPasswordForgotLink(serializers.Serializer):
         else:
             raise ValidationErr("Your email address is not valid")
 
-class UserPasswordForgot(serializers.Serializer):
+class PasswordForgotSerializer(serializers.Serializer):
     user =""
     token ="" 
     try:    
         password = serializers.CharField(max_length=255, style={'input_type': 'password'}, write_only=True) 
-        password2 = serializers.CharField(max_length=255, style={'input_type': 'password'}, write_only=True)
-        
+        password2 = serializers.CharField(max_length=255, style={'input_type': 'password'}, write_only=True)        
         def validate(self, attrs):
             password = attrs.get('password')
             password2 = attrs.get('password2')

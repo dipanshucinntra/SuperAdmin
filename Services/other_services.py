@@ -5,10 +5,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 def Link_Generator(user):     
     uid= urlsafe_base64_encode(force_bytes(user.id))
-    print("Encoded user is: ", uid)
-    token =PasswordResetTokenGenerator().make_token(user )
-    print("Generated token: ", token)
+    token =PasswordResetTokenGenerator().make_token(user)
     link ="/password_reset/"+uid+'/'+token
-    print("Generated link: ", link)
     password_link=link
     return password_link

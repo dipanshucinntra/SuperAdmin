@@ -1,11 +1,8 @@
 from django.urls import path
-from .views import *
+from .views import customer_list, customer_detail
+
 
 urlpatterns = [
-    # path('create', admin.site.urls),
-    # path('update', admin.site.urls),
-    # path('login', admin.site.urls),
-    # path('logout', admin.site.urls),
-    # path('detail', admin.site.urls)
-
+    path('customers', customer_list, name='customer_list'),
+    path('customers/<int:pk>', customer_detail, name='customer_detail'),   
 ]

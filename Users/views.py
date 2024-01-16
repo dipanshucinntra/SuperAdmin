@@ -106,20 +106,20 @@ def forgot_password_link(request):
         data = request.data
         email = data['email']  
         if User.objects.filter(email=email).exists:
-            user = User.objects.filter(email=email).first() 
-            link = Link_Generator(user)
-            print(link)
-            return Response({"msg":"Password Reset link generated", "data":[], "link":link, "status":200}) 
+            serializer = PasswordForgotLinkSerializer(data=request.data)
+            if serializer.is_valid():                
+                print("serializer :", serializer.data)
+            return Response({"msg":"Password Reset link generated", "data":[], "status":200}) 
         else:
             return Response({"message":"Not Found","status":201,"data":[], "error":"User details not found"})  
     except Exception as e:
         return Response({"message":"Unsuccess","status":201,"data":[], "error":str(e)})     
-    # return Response(str(serializer.errors), status=400)    
-
+    
+    
 @api_view(['POST'])       
 def forgot_password(request, uid, token,):
     try:
-        serializer = UserPasswordForgot(data=request.data, context={"uid":uid, "token":token})  
+        serializer = PasswordForgotSerializer(data=request.data, context={"uid":uid, "token":token})  
         if serializer.is_valid(raise_exception=True):  
             return Response({"message":"Password Rest Successfully"}, status=200) 
         return Response(str(serializer.errors), status=400)   
