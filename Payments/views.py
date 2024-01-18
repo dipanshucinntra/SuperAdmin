@@ -29,7 +29,13 @@ def create(request):
                     print(file_url)
                     file_serializer = AttachmentSerializer(data={"file_url":file_url, "link_id":payment_id, "link_type":"","caption":""})
                     if file_serializer.is_valid():
-                        file_serializer.save()                    
+                        file_serializer.save()   
+                    else:
+                        if Attachment.objects.filter(link_id=payment_id).exists():
+                           Attachment.objects.filter(link_id=payment_id).delete()
+                        PyamentsHistory.objects.filter(id=payment_id).delete()    
+                        first_error = next(iter(serializer.errors.values()))
+                        return Response({"message":"Unsuccess","status":403,"data":[], "errors":str(first_error)})                     
             return Response({"message":"Success", "status":200,"data":[], "errors":""})
         else:
             first_error = next(iter(serializer.errors.values()))

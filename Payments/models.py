@@ -8,7 +8,8 @@ currentTime = datetime.now(timezone("Asia/Kolkata")).strftime('%H:%M:%S')
 
 # Create your models here.
 class PyamentsHistory(models.Model):
-    customer_name = models.CharField(max_length=100, blank=True, null=True)
+    # customer_id = models.CharField(max_length=20, blank=True, null=True) 
+    customer_name = models.CharField(max_length=100, blank=True, null=True)    
     invoice_number = models.CharField(max_length=30, blank=True, null=True)
     transaction_mode = models.CharField(max_length=50, blank=True, null=True)
     total_amount = models.CharField(max_length=30, blank=True, null=True)
