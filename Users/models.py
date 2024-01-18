@@ -4,7 +4,7 @@ from django.db import models
 
 # Create your models here.
 class UserManager(BaseUserManager):
-    def create_user(self, first_name, last_name, email, mobile, password=None, password2=None):
+    def create_user(self, first_name, last_name, address, email, mobile, password=None, password2=None):
         """
         Creates and saves a User with the given email, category, first_name,last_name, email, address, country, state, phone, fax and password.
         """
@@ -14,6 +14,7 @@ class UserManager(BaseUserManager):
         user = self.model(
             first_name = first_name,
             last_name=last_name,
+            address=address,
             email=self.normalize_email(email),    
             mobile=mobile,                            
         )
@@ -72,3 +73,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
         return self.is_admin
+
+class Application(models.Model):
+    application_name =  models.CharField(max_length=100, blank=False, null=False)
+    about_application =  models.CharField(max_length=1000, blank=False, null=False)
+    create_at =  models.DateTimeField(auto_now_add = True)
+    update_at =  models.DateTimeField(auto_now_add = True)
+
+    def __str__(self):        
+        return self.application_name
+    

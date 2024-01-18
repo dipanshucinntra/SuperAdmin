@@ -128,3 +128,8 @@ class AuthUserSerializer(serializers.ModelSerializer):
 
 class EmptySerializer(serializers.Serializer):
     pass
+
+class ApplicationSerializer(serializers.Serializer):
+    class Meta:
+        model = Application
+        fields = '__all__'

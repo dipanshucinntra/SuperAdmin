@@ -16,18 +16,19 @@ def create(request):
         serializer = PyamentsHistorySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            payment_id = PyamentsHistory.objects.latest("id").id
+            payment = PyamentsHistory.objects.latest("id")
+            payment_id = payment.id
             for File in request.FILES.getlist('file'):
                 file_url = ""
                 if File !="" :
-                    target ='./bridge/static/image/Attachment'
+                    target ='./payments/image/Attachment'
                     os.makedirs(target, exist_ok=True)
                     fss = FileSystemStorage()
                     file = fss.save(target+"/"+File.name, File)
                     productImage_url = fss.url(file)
                     file_url = productImage_url.replace('/bridge/', '/')
                     print(file_url)
-                    file_serializer = AttachmentSerializer(data={"file_url":file_url, "link_id":payment_id, "link_type":"","caption":""})
+                    file_serializer = AttachmentSerializer(data={"file_url":file_url, "payment_id":int(payment_id), "link_type":"","caption":""})
                     if file_serializer.is_valid():
                         file_serializer.save()   
                     else:
