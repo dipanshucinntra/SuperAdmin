@@ -12,31 +12,93 @@ from .serializers import *
 @permission_classes([IsAuthenticated])
 def create(request):
     try:
+        print("request data : ", request.data)
+        application_details = request.data['application_details']
         customer_name = request.data['customer_name']
         if Customer.objects.filter(customer_name=customer_name).exists():
-            return Response({"message":"Already Exists","status":400,"data":[], "errors":"Application already exists"})
-        else:
+            return Response({"message":"Already Exists","status":400,"data":[], "errors":"Customer is already exists"})
+        else: 
+            industry_id = request.data['industry']    
+            try:
+                industry_obj = Industries.objects.filter(id=industry_id).first()
+                request.data['industry'] = IndustriesSerializer(industry_obj).data
+            except Industries.DoesNotExist:
+                return Response({"message": "Not Found", "status": 404, "data": [], "errors": "Industry not found"})                   
             serializer = CustomerSerializer(data=request.data)
             if serializer.is_valid():
                 customer = serializer.save()
-                app_serializer = ApplicationDetailsSerializer(data=request.data['applications'])
+                try:
+                    print("customer industry : ", customer.industry)
+                    for application in application_details: 
+                        application_id = application['application']                                               
+                        application_obj = Application.objects.filter(id=application_id).first()
+                        application['application']= [ApplicationSerializer(application_obj).data]
+                        customer_dict = CustomerDetailsSerializer(customer).data
+                        customer_dict['industry'] = IndustriesSerializer(customer.industry).data
+                        application['customer'] = customer_dict
+                except Application.DoesNotExist:
+                    return Response({"message": "Not Found", "status": 404, "data": [], "errors": "Application not found"})  
+                app_serializer = ApplicationDetailsSerializer(data=application_details, many=True)
                 if app_serializer.is_valid():
-                    app_obj = app_serializer.save()
-                    return Response({"message":"Success", "status":200, "data":[ApplicationDetailsSerializer(app_obj).data], "errors":""})
+                    app_objs = app_serializer.save()
+                    return Response({"message":"Success", "status":200, "data":app_serializer.data, "errors":""})
                 else:
                     customer_id = customer.id
                     if ApplicationDetails.objects.filter(customer=customer).exists():
                        ApplicationDetails.objects.filter(customer=customer).delete() 
                     if Customer.objects.filter(id=customer_id).exists():
                        Customer.objects.filter(id=customer_id).delete() 
-                    first_error = next(iter(serializer.errors.values()))
-                    return Response({"message":"Unsuccess","status":403,"data":[], "errors":str(first_error)})
+                    # first_error = next(iter(app_serializer.errors.values()))
+                    return Response({"message":"Unsuccess","status":403,"data":[], "errors":str(app_serializer.errors)})                         
+            else:
+                # first_error = next(iter(serializer.errors.values()))
+                return Response({"message":"Unsuccess","status":403,"data":[], "errors":str(serializer.errors)})   
+    except Exception as e:
+        return Response({"message":"Unsuccess","status":500,"data":[], "error":str(e)})
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def add_employee(request):
+    try:
+        email = request.data['email']
+        if Employee.objects.filter(email=email).exists():
+            return Response({"message":"Already Exists","status":400,"data":[], "errors":"Employee is already exists"})
+        else:
+            serializer = EmployeeSerializer(data=request.data)
+            if serializer.is_valid():
+                emp_obj = serializer.save()
+                return Response({"message":"Success", "status":200, "data":EmployeeSerializer(emp_obj).data, "errors":""})
             else:
                 first_error = next(iter(serializer.errors.values()))
-                return Response({"message":"Unsuccess","status":403,"data":[], "errors":str(first_error)})   
+                return Response({"message":"Unsuccess","status":403,"data":[], "errors":str(first_error)}) 
     except Exception as e:
-        return Response({"message":"Unsuccess","status":500,"data":[], "error":str(e)}) 
+        return Response({"message":"Unsuccess","status":500,"data":[], "error":str(e)})
 
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def update_employee(request):
+    try:
+        email = request.data['email']
+        emp_id = request.data['id']        
+        if Employee.objects.filter(email=email).exclude(id=emp_id).exists():
+            return Response({"message":"Already Exists","status":400,"data":[], "errors":"Employee is already exists"})
+        else:
+            if Employee.objects.filter(id=emp_id).exists():
+                emp_obj= Employee.objects.filter(id=emp_id).first()
+                serializer = EmployeeSerializer(instance=emp_obj, data=request.data, partial=True)
+                if serializer.is_valid():
+                    emp_obj = serializer.save()
+                    return Response({"message":"Success", "status":200, "data":EmployeeSerializer(emp_obj).data, "errors":""})
+                else:
+                    first_error = next(iter(serializer.errors.values()))
+                    return Response({"message":"Unsuccess","status":403,"data":[], "errors":str(first_error)}) 
+            else:
+                return Response({"message":"Not Found","status":403,"data":[], "errors":"Employee is not exists"})    
+    except Exception as e:
+        return Response({"message":"Unsuccess","status":500,"data":[], "error":str(e)})
 
 @api_view(['GET', 'POST'])
 def customer_list(request):
