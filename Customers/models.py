@@ -1,10 +1,11 @@
 from django.db import models
 from Applications.models import Application
+from Industries.models import Industries
 
 # Create your models here.
 class Customer(models.Model):
-    customer_name = models.CharField(max_length=255)
-    industry = models.CharField(max_length=255)
+    industry = models.ForeignKey(Industries, on_delete=models.CASCADE, editable=True)
+    customer_name = models.CharField(max_length=255)    
     phone_number = models.CharField(max_length=20)
     email = models.EmailField()
     address = models.TextField()

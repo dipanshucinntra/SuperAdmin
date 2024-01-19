@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'Applications',
     'Users',
     'Customers',
+    'Industries',
     'Payments',
 ]
 
