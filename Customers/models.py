@@ -1,5 +1,5 @@
 from django.db import models
-from Users.models import Application
+from Applications.models import Application
 
 # Create your models here.
 class Customer(models.Model):

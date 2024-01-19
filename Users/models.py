@@ -74,12 +74,5 @@ class User(AbstractBaseUser, PermissionsMixin):
         # Simplest possible answer: All admins are staff
         return self.is_admin
 
-class Application(models.Model):
-    application_name =  models.CharField(max_length=100, blank=False, null=False)
-    about_application =  models.CharField(max_length=1000, blank=False, null=False)
-    create_at =  models.DateTimeField(auto_now_add = True)
-    update_at =  models.DateTimeField(auto_now_add = True)
 
-    def __str__(self):        
-        return self.application_name
     

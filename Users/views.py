@@ -140,25 +140,8 @@ def logout(request):
         # Perform regular logout
         auth_logout(request)   
         # Perform regular logout 
-        return Response({'message': 'Logout successful', "status":200, "data":[], "errors":""})       
+        return Response({'message': 'Logout Successful', "status":200, "data":[], "errors":""})       
     else:
         return Response({'message': 'User is not authenticated', "status":403, "data":[], "errors":""})
 
 
-@api_view(['POST'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def application_create(request):
-    try:
-        application_name = request.data['application_name']
-        if Application.objects.filter(application_name=application_name).exists():
-            return Response({"message":"Already Exists","status":400,"data":[], "errors":"Application already exists"})
-        else:
-            serializer = ApplicationSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-            else:
-                first_error = next(iter(serializer.errors.values()))
-                return Response({"message":"Unsuccess","status":403,"data":[], "errors":str(first_error)})   
-    except Exception as e:
-        return Response({"message":"Unsuccess","status":500,"data":[], "error":str(e)}) 
