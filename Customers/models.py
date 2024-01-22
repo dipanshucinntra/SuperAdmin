@@ -32,7 +32,7 @@ class Employee(models.Model):
 
 class ApplicationDetails(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    application = models.ManyToManyField(Application) #, blank=True, null=True
+    application = models.ForeignKey(Application, on_delete=models.CASCADE) #, blank=True, null=True
     license_cost = models.CharField(max_length=100, blank=False, null=False)
     active_users =models.CharField(max_length=100, blank=False, null=False)
     url = models.CharField(max_length=100, blank=False, null=False)
