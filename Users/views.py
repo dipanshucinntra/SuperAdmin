@@ -36,8 +36,9 @@ def login(request):
         if User.objects.filter(email=email).exists():
             user_obj = authenticate(request, email=email, password=password) 
             if user_obj is not None:
+                # user_instance = User.objects.filter(email=email).first()
                 token, created = Token.objects.get_or_create(user=user_obj)
-                return Response({"message":"Success","status":201,"data":[{"token":token.key}], "errors":""})
+                return Response({"message":"Success","status":201,"data":[UserDetailSerializer(user_obj).data], "token":str(token.key), "errors":""})
             else:
                 return Response({"message":"Unauthorized","status":401,"data":[], "errors":"Invaild Email or Password"})  
         else:

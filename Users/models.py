@@ -23,7 +23,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, first_name, last_name, email, mobile, password=None):
+    def create_superuser(self, first_name, last_name, email, mobile, address, password=None):
         """
         Creates and saves a superuser with the given email, category, first_name,last_name, email, address, country, state, phone, fax and password.
         """
@@ -32,6 +32,7 @@ class UserManager(BaseUserManager):
             last_name=last_name, 
             email=email,
             mobile=mobile,
+            address=address,
             password=password,                                 
         )
         user.is_admin = True
@@ -53,7 +54,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["first_name", "last_name", "mobile"]
+    REQUIRED_FIELDS = ["first_name", "last_name", "mobile", "address"]
 
     def __str__(self):        
         return self.first_name+" "+self.last_name

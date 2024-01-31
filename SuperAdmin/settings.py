@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-$!00xk3sfqi@v_cdobni!r82rg$b@uw_lw%a1vh93j3&4e3%cg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework.authtoken',
     'rest_framework', 
+    'corsheaders',
     'Applications',
     'Users',
     'Customers',
@@ -54,6 +55,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -109,6 +111,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ]
 }
+
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",  # Replace with the origin of your frontend
+    
+# ]
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -149,3 +157,63 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+def PAGE(json_data):
+    arr={}
+    try:
+        if str(json_data['maxItem']).lower()=="all":
+            endWith=None
+            startWith=0
+            arr['startWith'] = startWith
+            arr['endWith'] = endWith
+            return arr
+        else:
+            PageNo = json_data['PageNo']
+            try:
+                MaxItem = int(json_data['maxItem'])
+            except:
+                MaxItem = 10
+            endWith = (PageNo * MaxItem)
+            startWith = (endWith - MaxItem)
+
+            arr['startWith'] = startWith
+            arr['endWith'] = endWith
+            return arr
+    except Exception as e:
+        print(str(e))
+        return str(e)
+
+def BYFIELD(argument, val, objs, table):
+    if argument == "FromDate" and table in ["lead"]:
+        return objs.filter(date__gte=val)
+    elif argument == "ToDate" and table in ["lead"]:
+        return objs.filter(date__lte=val)
+    elif argument == "Source" and table in ["lead"]:
+        return objs.filter(source=val)
+    elif argument == "Status" and table in ["lead"]:
+        return objs.filter(status=val)    
+    elif argument == "FromDate" and table in ["quotation", "order", "invoice"]:
+        return objs.filter(CreationDate__gte=val)
+    elif argument == "ToDate" and table in ["quotation", "order", "invoice"]:
+        return objs.filter(CreationDate__lte=val)
+    elif argument == "CardCode" and table in ["order", "invoice", "businesspartner"]:
+        return objs.filter(CardCode=val)
+    elif argument == "CardName" and table in ["order", "invoice", "businesspartner"]:
+        return objs.filter(CardName=val)
+    elif argument == "CardType" and table in ["businesspartner"]:
+        return objs.filter(CardType=val)
+    elif argument == "DocEntry" and table in ["quotation", "order", "invoice"]:
+        return objs.filter(DocEntry=val)
+    elif argument == "FinalStatus" and table in ["quotation","order"]:
+        return objs.filter(FinalStatus=val)
+    else:
+        return objs
+
+def FILTER(json_data, objs, table):
+    keys = {}
+    for key in json_data:
+        if json_data[key]!="":
+            objs = BYFIELD(key, json_data[key], objs, table)
+    return objs

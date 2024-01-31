@@ -1,14 +1,17 @@
 from rest_framework import serializers
+from Customers.models import Customer
 from .models import *
 
 
 class PyamentsHistorySerializer(serializers.ModelSerializer):
+    customer = serializers.PrimaryKeyRelatedField(queryset=Customer.objects.all())  
     class Meta:
         model = PyamentsHistory
         fields = "__all__"
 
 
 class AttachmentSerializer(serializers.ModelSerializer):
+    payment = serializers.PrimaryKeyRelatedField(queryset=PyamentsHistory.objects.all()) 
     class Meta:
         model = Attachment
         fields = "__all__"

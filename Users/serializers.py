@@ -8,6 +8,10 @@ from Services.Emailer import sendMail
 from .models import *
 
 # User = get_user_model()
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields =  ['id', 'first_name', 'last_name', 'mobile', 'email', 'address'] 
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField() 
@@ -37,14 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
                 setattr(instance, attr, value)
         instance.save()
         return instance
-
-class UserLoginSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(max_length=255)
-    password = serializers.CharField()
-    class Meta:
-        model = User
-        fields = ['email', 'password']       
-    
+   
 
 class PasswordChangeSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=255, style={'input_type': 'password'}, write_only=True) 
